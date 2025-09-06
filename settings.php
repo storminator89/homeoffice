@@ -23,7 +23,7 @@ $currentQuota = $db->getSetting('homeoffice_quota');
 include 'templates/header.php';
 ?>
 
-<div class="row">
+<div class="row settings-view">
     <div class="col s12">
         <?php if (!empty($messages)) { ?>
             <script>window.serverMessages = <?php echo json_encode($messages); ?>;</script>

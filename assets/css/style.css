@@ -2295,3 +2295,33 @@ table td .material-icons.tiny {
   .day-item .day-header { min-height: 76px; padding: 1rem !important; }
   .day-item .day-body { padding: 1.25rem !important; }
 }
+[data-theme="dark"] .settings-view .card-panel {
+    background-color: #2b2b2b !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .settings-view .card-panel.hoverable:hover {
+    transform: none !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+[data-theme="dark"] .settings-view .input-field input[type="number"] {
+    background-color: #2a2a2a !important;
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255,255,255,0.3) !important;
+}
+[data-theme="dark"] .settings-view .input-field input[type="number"]:focus {
+    border-bottom-color: #64b5f6 !important;
+    box-shadow: 0 1px 0 0 #64b5f6 !important;
+}
+[data-theme="dark"] .settings-view .input-field label { color: rgba(255,255,255,0.8) !important; }
+[data-theme="dark"] .settings-view .helper-text { color: rgba(255,255,255,0.7) !important; }
+
+/* Range track for dark */
+[data-theme="dark"] .settings-view .range-field input[type=range]::-webkit-slider-runnable-track { background-color: #3a3a3a; }
+[data-theme="dark"] .settings-view .range-field input[type=range]::-moz-range-track { background-color: #3a3a3a; }
+[data-theme="dark"] .settings-view .range-field input[type=range]::-ms-track { background-color: #3a3a3a; border-color: transparent; color: transparent; }
+[data-theme="dark"] .settings-view .range-field input[type=range] { background-color: transparent; }
+
+/* Chip colors readable in dark */
+[data-theme="dark"] .settings-view .chip.green { background-color: #2e7d32 !important; }
+[data-theme="dark"] .settings-view .chip.orange { background-color: #ef6c00 !important; }
+[data-theme="dark"] .settings-view .chip.red { background-color: #c62828 !important; }
