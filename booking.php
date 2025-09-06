@@ -49,6 +49,13 @@ foreach ($dates as $d) {
     }
 }
 
+// Week headline metrics
+$weekSet = 5 - $weekCounts['none'];
+$workSet = $weekCounts['homeoffice'] + $weekCounts['office'];
+$weekProgress = max(0, min(100, round(($weekSet / 5) * 100)));
+$weekStartDisplay = date('d.m.Y', strtotime($dates[0]));
+$weekEndDisplay   = date('d.m.Y', strtotime(end($dates)));
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($_POST['location'] as $date => $location) {
         $dateObj = DateTime::createFromFormat('d.m.Y', $date);
@@ -93,41 +100,47 @@ include 'templates/header.php';
                 <!-- Week Navigator -->
                 <div class="row" style="margin-bottom: 2rem;">
                     <div class="col s12">
-                        <div class="card z-depth-0 blue lighten-5 week-navigator">
+                        <div class="card hero-card gradient-card week-navigator">
                             <div class="card-content">
-                                <div class="row valign-wrapper" style="margin-bottom: 0;">
-                                    <div class="col s2 center-align">
+                                <div class="week-toolbar">
+                                    <div class="nav left">
                                         <a href="?week=<?php echo $prevWeek->format('W'); ?>&year=<?php echo $prevWeek->format('Y'); ?>" 
-                                           class="btn-floating waves-effect waves-light blue darken-1 hoverable">
-                                            <i class="material-icons">chevron_left</i>
+                                           class="btn-floating btn-small waves-effect waves-light white">
+                                            <i class="material-icons blue-text text-darken-2">chevron_left</i>
                                         </a>
                                     </div>
-                                    <div class="col s8 center-align">
-                                        <div class="week-chips" style="margin-bottom: 8px;">
-                                            <span class="chip blue darken-1 white-text hoverable" style="font-size: 1rem; height: auto; line-height: 2;">
-                                                <i class="material-icons" style="float: none; font-size: inherit; line-height: inherit; margin-right: 4px;">calendar_today</i>
-                                                KW <?php echo $selectedWeek; ?>
-                                            </span>
-                                            <span class="chip blue darken-2 white-text hoverable" style="font-size: 1rem; height: auto; line-height: 2;">
-                                                <i class="material-icons" style="float: none; font-size: inherit; line-height: inherit; margin-right: 4px;">event</i>
-                                                <?php echo $selectedYear; ?>
-                                            </span>
+                                    <div class="center">
+                                        <div class="title-row">
+                                            <span class="kw">KW <?php echo $selectedWeek; ?></span>
+                                            <span class="year"><?php echo $selectedYear; ?></span>
                                         </div>
-                                        <?php if ($selectedWeek != date('W') || $selectedYear != date('Y')) { ?>
-                                            <div>
-                                                <a href="?week=<?php echo date('W'); ?>&year=<?php echo date('Y'); ?>" 
-                                                   class="btn waves-effect waves-light blue darken-1 hoverable">
-                                                    <i class="material-icons" style="vertical-align: middle; line-height: inherit; margin: -2px 4px 0 -4px;">today</i>
-                                                    <span style="vertical-align: middle;">Aktuelle Woche</span>
-                                                </a>
-                                            </div>
-                                        <?php } ?>
+                                        <div class="sub">
+                                            <i class="material-icons tiny" style="vertical-align: text-bottom;">date_range</i>
+                                            <?php echo $weekStartDisplay; ?> – <?php echo $weekEndDisplay; ?>
+                                        </div>
                                     </div>
-                                    <div class="col s2 center-align">
+                                    <div class="nav right">
+                                        <?php if ($selectedWeek != date('W') || $selectedYear != date('Y')) { ?>
+                                            <a href="?week=<?php echo date('W'); ?>&year=<?php echo date('Y'); ?>" class="btn btn-outline-light btn-small hide-on-small-only">
+                                                <i class="material-icons left">today</i> Aktuelle Woche
+                                            </a>
+                                        <?php } ?>
                                         <a href="?week=<?php echo $nextWeek->format('W'); ?>&year=<?php echo $nextWeek->format('Y'); ?>" 
-                                           class="btn-floating waves-effect waves-light blue darken-1 hoverable">
-                                            <i class="material-icons">chevron_right</i>
+                                           class="btn-floating btn-small waves-effect waves-light white">
+                                            <i class="material-icons blue-text text-darken-2">chevron_right</i>
                                         </a>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin: 0.5rem 0 0;">
+                                    <div class="col s12">
+                                        <div class="week-progress">
+                                            <div class="progress" style="height: 10px; border-radius: 999px; background: rgba(255,255,255,0.35);">
+                                                <div id="week-progress-bar" class="determinate" style="width: <?php echo $weekProgress; ?>%; background: linear-gradient(90deg, #42a5f5, #1e88e5);"></div>
+                                            </div>
+                                            <div class="grey-text text-lighten-4" id="week-progress-label" style="margin-top: .25rem; font-size: .95rem;">
+                                                <?php echo $weekSet; ?>/5 gesetzt • HO: <?php echo $weekCounts['homeoffice']; ?> • Büro: <?php echo $weekCounts['office']; ?>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -201,35 +214,41 @@ include 'templates/header.php';
                                             $icon = 'home';
                                             $statusColor = 'blue-text';
                                             $locationText = 'Homeoffice';
+                                            $statusClass = 'status-homeoffice';
                                             break;
                                         case 'office':
                                             $icon = 'business';
                                             $statusColor = 'orange-text';
                                             $locationText = 'Büro';
+                                            $statusClass = 'status-office';
                                             break;
                                         case 'vacation':
                                             $icon = 'beach_access';
                                             $statusColor = 'purple-text';
                                             $locationText = 'Urlaub';
+                                            $statusClass = 'status-vacation';
                                             break;
                                         case 'sick':
                                             $icon = 'healing';
                                             $statusColor = 'red-text';
                                             $locationText = 'Krank';
+                                            $statusClass = 'status-sick';
                                             break;
                                         case 'training':
                                             $icon = 'school';
                                             $statusColor = 'teal-text';
                                             $locationText = 'Schulung';
+                                            $statusClass = 'status-training';
                                             break;
                                         default:
                                             $icon = 'radio_button_unchecked';
                                             $statusColor = 'grey-text';
                                             $locationText = 'Keine Angabe';
+                                            $statusClass = 'status-none';
                                     }
                                     ?>
-                                    <li class="<?php echo $isToday ? 'active' : ''; ?>">
-                                        <div class="collapsible-header <?php echo $isToday ? 'blue lighten-5' : ''; ?>" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <li class="day-item <?php echo $isToday ? 'active' : ''; ?> <?php echo $statusClass; ?>">
+                                        <div class="collapsible-header <?php echo $isToday ? 'blue lighten-5' : ''; ?> day-header" style="display: flex; justify-content: space-between; align-items: center;">
                                             <div style="display: flex; align-items: center; gap: 1rem;">
                                                 <i class="material-icons <?php echo $statusColor; ?>"><?php echo $icon; ?></i>
                                                 <div>
@@ -251,7 +270,7 @@ include 'templates/header.php';
                                                 <i class="material-icons grey-text">expand_more</i>
                                             </div>
                                         </div>
-                                        <div class="collapsible-body">
+                                        <div class="collapsible-body day-body">
                                             <div class="row" style="margin-bottom: 0;">
                                                 <div class="col s12">
                                                     <div class="segmented center-align">

@@ -151,6 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const el = document.getElementById(id);
             if (el) el.textContent = counts[key];
         });
+
+        // Update progress bar and label
+        const totalDays = Object.keys(map).includes('none') ? (counts.homeoffice + counts.office + counts.vacation + counts.sick + counts.training + counts.none) : 5;
+        const setDays = totalDays - counts.none;
+        const progress = Math.max(0, Math.min(100, Math.round((setDays / totalDays) * 100)));
+        const bar = document.getElementById('week-progress-bar');
+        const label = document.getElementById('week-progress-label');
+        if (bar) bar.style.width = progress + '%';
+        if (label) label.textContent = `${setDays}/${totalDays} gesetzt • HO: ${counts.homeoffice} • Büro: ${counts.office}`;
     }
 
     // Hook into radio changes to refresh summary

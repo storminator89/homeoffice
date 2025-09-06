@@ -2202,3 +2202,77 @@ table td .material-icons.tiny {
     margin-top: -64px; /* Kompensiert den Header-Abstand */
     padding-top: 32px; /* Etwas Abstand zum oberen Rand */
 }
+.hero-card {
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #1565c0, #42a5f5) !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .hero-card {
+    background: linear-gradient(135deg, #0d47a1, #1976d2) !important;
+}
+.week-progress .progress .determinate {
+    border-radius: 999px;
+}
+
+/* Week toolbar redesign */
+.week-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+.week-toolbar .nav { display:flex; align-items:center; gap:8px; }
+.week-toolbar .center { flex: 1 1 auto; text-align: center; }
+.week-toolbar .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+}
+.week-toolbar .title-row .kw { padding: .1rem .6rem; border-radius: 8px; background: rgba(255,255,255,0.12); }
+.week-toolbar .title-row .year { opacity: .95; }
+.week-toolbar .sub { color: rgba(255,255,255,0.9); margin-top: .25rem; font-size: .95rem; }
+.week-toolbar .btn-floating { margin: 0; }
+
+.btn-outline-light {
+    background: transparent !important;
+    border: 1.5px solid rgba(255,255,255,0.85) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+.btn-outline-light:hover { background: rgba(255,255,255,0.12) !important; }
+
+@media (max-width: 600px) {
+  .week-toolbar { flex-wrap: wrap; gap: 8px; }
+  .week-toolbar .center { order: -1; width: 100%; }
+  .week-toolbar .nav { flex: 1 1 50%; justify-content: space-between; }
+}
+
+.day-item .day-header {
+    min-height: 84px;
+    padding: 1.25rem !important;
+}
+.day-item .day-body {
+    padding: 1.25rem 1.25rem 1.25rem 1.25rem !important;
+}
+.day-item .day-body .segmented {
+    margin-top: .25rem;
+}
+.day-item.status-homeoffice .day-header { border-left: 6px solid #2196f3; background: rgba(33,150,243,0.06); }
+.day-item.status-office .day-header { border-left: 6px solid #fb8c00; background: rgba(251,140,0,0.06); }
+.day-item.status-vacation .day-header { border-left: 6px solid #8e24aa; background: rgba(142,36,170,0.06); }
+.day-item.status-sick .day-header { border-left: 6px solid #e53935; background: rgba(229,57,53,0.06); }
+.day-item.status-training .day-header { border-left: 6px solid #00897b; background: rgba(0,137,123,0.06); }
+.day-item.status-none .day-header { border-left: 6px solid #9e9e9e; background: rgba(0,0,0,0.03); }
+
+.day-item .material-icons { vertical-align: middle; }
+
+@media (max-width: 600px) {
+  .segmented .pill { padding: .6rem .8rem; }
+  .day-item .day-header { min-height: 76px; padding: 1rem !important; }
+  .day-item .day-body { padding: 1rem !important; }
+}
