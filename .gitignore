@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# PHP/Composer
+/vendor/
+composer.phar
+
+# Local data
+/homeoffice.db
+/storage/
+/tmp/
+
+# Logs
+*.log
+logs/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.iml
+
+# Node (future-proof)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Cache
+.cache/
+.phpunit.result.cache
+
