@@ -95,7 +95,7 @@ include 'templates/header.php';
             </script>
         <?php } ?>
         
-        <div class="card">
+        <div class="card no-hover">
             <div class="card-content">
                 <!-- Week Navigator -->
                 <div class="row" style="margin-bottom: 2rem;">
@@ -131,18 +131,7 @@ include 'templates/header.php';
                                         </a>
                                     </div>
                                 </div>
-                                <div class="row" style="margin: 0.5rem 0 0;">
-                                    <div class="col s12">
-                                        <div class="week-progress">
-                                            <div class="progress" style="height: 10px; border-radius: 999px; background: rgba(255,255,255,0.35);">
-                                                <div id="week-progress-bar" class="determinate" style="width: <?php echo $weekProgress; ?>%; background: linear-gradient(90deg, #42a5f5, #1e88e5);"></div>
-                                            </div>
-                                            <div class="grey-text text-lighten-4" id="week-progress-label" style="margin-top: .25rem; font-size: .95rem;">
-                                                <?php echo $weekSet; ?>/5 gesetzt • HO: <?php echo $weekCounts['homeoffice']; ?> • Büro: <?php echo $weekCounts['office']; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -155,7 +144,7 @@ include 'templates/header.php';
                     <!-- Schnellaktionen & Zusammenfassung -->
                     <div class="row" style="margin-bottom: 1.5rem;">
                         <div class="col s12">
-                            <div class="card-panel glass-panel sticky-actions" style="display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+                            <div class="card-panel glass-panel sticky-actions" style="display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
                                 <span class="grey-text text-darken-1" style="margin-right: .5rem; display: inline-flex; align-items: center; gap: .4rem;">
                                     <i class="material-icons">bolt</i> Woche komplett setzen
                                 </span>
@@ -180,14 +169,7 @@ include 'templates/header.php';
                                     </button>
                                 </div>
 
-                                <div class="summary" style="display:flex; gap:.5rem; align-items:center; flex-wrap: wrap;">
-                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny blue-text">home</i> <span id="week-count-homeoffice"><?php echo $weekCounts['homeoffice']; ?></span></div>
-                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny orange-text">business</i> <span id="week-count-office"><?php echo $weekCounts['office']; ?></span></div>
-                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny purple-text">beach_access</i> <span id="week-count-vacation"><?php echo $weekCounts['vacation']; ?></span></div>
-                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny red-text">healing</i> <span id="week-count-sick"><?php echo $weekCounts['sick']; ?></span></div>
-                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny teal-text">school</i> <span id="week-count-training"><?php echo $weekCounts['training']; ?></span></div>
-                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny grey-text">remove_circle_outline</i> <span id="week-count-none"><?php echo $weekCounts['none']; ?></span></div>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
