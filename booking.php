@@ -31,6 +31,24 @@ for ($i = 0; $i < 5; $i++) {
 
 $existingBookings = $db->getBookingsForDates($dates);
 
+// Woche-Zusammenfassung initial berechnen
+$weekCounts = [
+    'homeoffice' => 0,
+    'office' => 0,
+    'vacation' => 0,
+    'sick' => 0,
+    'training' => 0,
+    'none' => 0
+];
+foreach ($dates as $d) {
+    $val = isset($existingBookings[$d]) ? $existingBookings[$d] : '';
+    if ($val === '' || $val === null) {
+        $weekCounts['none']++;
+    } elseif (isset($weekCounts[$val])) {
+        $weekCounts[$val]++;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($_POST['location'] as $date => $location) {
         $dateObj = DateTime::createFromFormat('d.m.Y', $date);
@@ -121,32 +139,42 @@ include 'templates/header.php';
                     <input type="hidden" name="week" value="<?php echo $selectedWeek; ?>">
                     <input type="hidden" name="year" value="<?php echo $selectedYear; ?>">
                     
-                    <!-- Schnellaktionen: ganze Woche setzen -->
+                    <!-- Schnellaktionen & Zusammenfassung -->
                     <div class="row" style="margin-bottom: 1.5rem;">
                         <div class="col s12">
-                            <div class="card-panel grey lighten-4" style="display: flex; gap: .5rem; flex-wrap: wrap; align-items: center;">
+                            <div class="card-panel glass-panel sticky-actions" style="display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
                                 <span class="grey-text text-darken-1" style="margin-right: .5rem; display: inline-flex; align-items: center; gap: .4rem;">
-                                    <i class="material-icons">flash_on</i> Woche komplett:
+                                    <i class="material-icons">bolt</i> Woche komplett setzen
                                 </span>
-                                <button type="button" class="btn blue waves-effect waves-light" data-week-action="homeoffice">
-                                    <i class="material-icons left">home</i> Homeoffice
-                                </button>
-                                <button type="button" class="btn orange waves-effect waves-light" data-week-action="office">
-                                    <i class="material-icons left">business</i> Büro
-                                </button>
-                                <button type="button" class="btn grey waves-effect waves-light" data-week-action="none">
-                                    <i class="material-icons left">block</i> Keine Angabe
-                                </button>
-                                <div class="hide-on-small-only" style="width: 1px; height: 24px; background: #ddd; margin: 0 .5rem;"></div>
-                                <button type="button" class="btn purple waves-effect waves-light" data-week-action="vacation">
-                                    <i class="material-icons left">beach_access</i> Urlaub
-                                </button>
-                                <button type="button" class="btn red waves-effect waves-light" data-week-action="sick">
-                                    <i class="material-icons left">healing</i> Krank
-                                </button>
-                                <button type="button" class="btn teal waves-effect waves-light" data-week-action="training">
-                                    <i class="material-icons left">school</i> Schulung
-                                </button>
+                                <div class="actions" style="display:flex; gap:.5rem; flex-wrap: wrap; align-items:center;">
+                                    <button type="button" class="btn blue waves-effect waves-light" data-week-action="homeoffice">
+                                        <i class="material-icons left">home</i> Homeoffice
+                                    </button>
+                                    <button type="button" class="btn orange waves-effect waves-light" data-week-action="office">
+                                        <i class="material-icons left">business</i> Büro
+                                    </button>
+                                    <button type="button" class="btn grey waves-effect waves-light" data-week-action="none">
+                                        <i class="material-icons left">block</i> Keine
+                                    </button>
+                                    <button type="button" class="btn purple waves-effect waves-light" data-week-action="vacation">
+                                        <i class="material-icons left">beach_access</i> Urlaub
+                                    </button>
+                                    <button type="button" class="btn red waves-effect waves-light" data-week-action="sick">
+                                        <i class="material-icons left">healing</i> Krank
+                                    </button>
+                                    <button type="button" class="btn teal waves-effect waves-light" data-week-action="training">
+                                        <i class="material-icons left">school</i> Schulung
+                                    </button>
+                                </div>
+
+                                <div class="summary" style="display:flex; gap:.5rem; align-items:center; flex-wrap: wrap;">
+                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny blue-text">home</i> <span id="week-count-homeoffice"><?php echo $weekCounts['homeoffice']; ?></span></div>
+                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny orange-text">business</i> <span id="week-count-office"><?php echo $weekCounts['office']; ?></span></div>
+                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny purple-text">beach_access</i> <span id="week-count-vacation"><?php echo $weekCounts['vacation']; ?></span></div>
+                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny red-text">healing</i> <span id="week-count-sick"><?php echo $weekCounts['sick']; ?></span></div>
+                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny teal-text">school</i> <span id="week-count-training"><?php echo $weekCounts['training']; ?></span></div>
+                                    <div class="chip white grey-text text-darken-2"><i class="material-icons tiny grey-text">remove_circle_outline</i> <span id="week-count-none"><?php echo $weekCounts['none']; ?></span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -226,45 +254,45 @@ include 'templates/header.php';
                                         <div class="collapsible-body">
                                             <div class="row" style="margin-bottom: 0;">
                                                 <div class="col s12">
-                                                    <div class="switch-field center-align">
+                                                    <div class="segmented center-align">
                                                         <label>
                                                             <input name="location[<?php echo $displayDate; ?>]" type="radio" value="office" <?php echo $existingLocation === 'office' ? 'checked' : ''; ?>>
-                                                            <span>
+                                                            <span class="pill orange-text text-darken-1">
                                                                 <i class="material-icons">business</i>
                                                                 Büro
                                                             </span>
                                                         </label>
                                                         <label>
                                                             <input name="location[<?php echo $displayDate; ?>]" type="radio" value="homeoffice" <?php echo $existingLocation === 'homeoffice' ? 'checked' : ''; ?>>
-                                                            <span>
+                                                            <span class="pill blue-text text-darken-1">
                                                                 <i class="material-icons">home</i>
                                                                 Homeoffice
                                                             </span>
                                                         </label>
                                                         <label>
                                                             <input name="location[<?php echo $displayDate; ?>]" type="radio" value="vacation" <?php echo $existingLocation === 'vacation' ? 'checked' : ''; ?>>
-                                                            <span>
+                                                            <span class="pill purple-text text-darken-1">
                                                                 <i class="material-icons">beach_access</i>
                                                                 Urlaub
                                                             </span>
                                                         </label>
                                                         <label>
                                                             <input name="location[<?php echo $displayDate; ?>]" type="radio" value="sick" <?php echo $existingLocation === 'sick' ? 'checked' : ''; ?>>
-                                                            <span>
+                                                            <span class="pill red-text text-darken-1">
                                                                 <i class="material-icons">healing</i>
                                                                 Krank
                                                             </span>
                                                         </label>
                                                         <label>
                                                             <input name="location[<?php echo $displayDate; ?>]" type="radio" value="training" <?php echo $existingLocation === 'training' ? 'checked' : ''; ?>>
-                                                            <span>
+                                                            <span class="pill teal-text text-darken-1">
                                                                 <i class="material-icons">school</i>
                                                                 Schulung
                                                             </span>
                                                         </label>
                                                         <label>
                                                             <input name="location[<?php echo $displayDate; ?>]" type="radio" value="" <?php echo $existingLocation === '' ? 'checked' : ''; ?>>
-                                                            <span>
+                                                            <span class="pill grey-text text-darken-1">
                                                                 <i class="material-icons">block</i>
                                                                 Keine Angabe
                                                             </span>
@@ -291,6 +319,18 @@ include 'templates/header.php';
             </div>
         </div>
     </div>
+</div>
+
+<!-- Floating Save Button -->
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large blue" id="fab-save" title="Speichern">
+    <i class="large material-icons">save</i>
+  </a>
+  <ul>
+    <li><a class="btn-floating grey tooltipped" data-tooltip="Woche leeren" data-week-action="none"><i class="material-icons">block</i></a></li>
+    <li><a class="btn-floating orange tooltipped" data-tooltip="Woche Büro" data-week-action="office"><i class="material-icons">business</i></a></li>
+    <li><a class="btn-floating blue tooltipped" data-tooltip="Woche Homeoffice" data-week-action="homeoffice"><i class="material-icons">home</i></a></li>
+  </ul>
 </div>
 
 <?php include 'templates/footer.php'; ?>

@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
 
+    // Cache primary form + save button early (fix ReferenceError)
+    const form = document.querySelector('form');
+    const saveButton = document.querySelector('.save-button');
+
     // Initialize MaterializeCSS components
     var collapsibles = document.querySelectorAll('.collapsible');
     M.Collapsible.init(collapsibles, {
@@ -48,9 +52,13 @@ document.addEventListener('DOMContentLoaded', function() {
         M.Tabs.init(tabs);
     }
 
+    // Floating action save button
+    const fabSave = document.getElementById('fab-save');
+    if (fabSave && form) {
+        fabSave.addEventListener('click', () => { form.submit(); });
+    }
+
     // Pulsierender Speichern-Button nur nach Änderung
-    const form = document.querySelector('form');
-    const saveButton = document.querySelector('.save-button');
     if (form && saveButton) {
         const inputs = form.querySelectorAll('input[type="radio"]');
         inputs.forEach(input => {
@@ -88,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             saveButton.classList.add('pulse');
             showToast('Woche gesetzt: ' + labelFor(targetValue));
+            updateWeekSummary();
         };
 
         weekButtons.forEach(btn => {
@@ -118,4 +127,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize Materialize components
     M.AutoInit();
+
+    // Update week summary counts on change
+    function updateWeekSummary() {
+        if (!form) return;
+        const radios = Array.from(form.querySelectorAll('input[type="radio"][name^="location["]'));
+        const names = [...new Set(radios.map(r => r.name))];
+        const counts = {homeoffice:0, office:0, vacation:0, sick:0, training:0, none:0};
+        names.forEach(name => {
+            const checked = radios.find(r => r.name === name && r.checked);
+            const val = checked ? checked.value : '';
+            if (!val) counts.none++; else if (counts.hasOwnProperty(val)) counts[val]++;
+        });
+        const map = {
+            homeoffice: 'week-count-homeoffice',
+            office: 'week-count-office',
+            vacation: 'week-count-vacation',
+            sick: 'week-count-sick',
+            training: 'week-count-training',
+            none: 'week-count-none'
+        };
+        Object.entries(map).forEach(([key, id]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = counts[key];
+        });
+    }
+
+    // Hook into radio changes to refresh summary
+    document.querySelectorAll('input[type="radio"][name^="location["]').forEach(r => {
+        r.addEventListener('change', updateWeekSummary);
+    });
+    updateWeekSummary();
 });

@@ -183,21 +183,23 @@ class Database {
     }
 
     public function calculateHomeofficeQuota($bookings) {
-        $totalDays = 0;
+        $workDays = 0; // only office + homeoffice are relevant
         $homeofficeDays = 0;
         
         while ($row = $bookings->fetchArray(SQLITE3_ASSOC)) {
-            $totalDays++;
             if ($row['location'] === 'homeoffice') {
                 $homeofficeDays++;
+                $workDays++;
+            } elseif ($row['location'] === 'office') {
+                $workDays++;
             }
         }
         
-        if ($totalDays === 0) {
+        if ($workDays === 0) {
             return 0;
         }
         
-        return round(($homeofficeDays / $totalDays) * 100);
+        return round(($homeofficeDays / $workDays) * 100);
     }
 
     public function getTargetHomeofficeQuota() {

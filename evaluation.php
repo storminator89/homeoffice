@@ -156,10 +156,11 @@ include 'templates/header.php';
                                     $monthlyStats[$month][$row['location']]++;
                                 }
                                 
-                                $total = $stats['homeoffice'] + $stats['office'] + $stats['vacation'] + $stats['sick'] + $stats['training'];
-                                if ($total > 0) {
-                                    $homeofficePercent = round(($stats['homeoffice'] / $total) * 100);
-                                    $officePercent = round(($stats['office'] / $total) * 100);
+                                $totalAll = $stats['homeoffice'] + $stats['office'] + $stats['vacation'] + $stats['sick'] + $stats['training'];
+                                $workTotal = $stats['homeoffice'] + $stats['office'];
+                                if ($totalAll > 0) {
+                                    $homeofficePercent = $workTotal > 0 ? round(($stats['homeoffice'] / $workTotal) * 100) : 0;
+                                    $officePercent = $workTotal > 0 ? round(($stats['office'] / $workTotal) * 100) : 0;
                                     ?>
                                     
                                     <div class="row">
@@ -178,7 +179,7 @@ include 'templates/header.php';
                                                 <div class="card">
                                                     <div class="card-content center-align">
                                                         <i class="material-icons medium">event_note</i>
-                                                        <span class="card-title"><?php echo $total; ?></span>
+                                                        <span class="card-title"><?php echo $totalAll; ?></span>
                                                         <p>Gesamtbuchungen</p>
                                                     </div>
                                                 </div>
@@ -213,7 +214,7 @@ include 'templates/header.php';
                                                 <div class="card">
                                                     <div class="card-content center-align">
                                                         <i class="material-icons medium green-text">trending_up</i>
-                                                        <span class="card-title"><?php echo number_format($stats['homeoffice'] / $total * 5, 1); ?></span>
+                                                        <span class="card-title"><?php echo number_format(($workTotal > 0 ? ($stats['homeoffice'] / $workTotal) : 0) * 5, 1); ?></span>
                                                         <p>Ø Homeoffice Tage/Woche</p>
                                                     </div>
                                                 </div>

@@ -6,13 +6,15 @@ include 'database.php';
 $db = new Database();
 $dbConnection = $db->getDb();
 
+// Counts
 $totalBookings = $dbConnection->query("SELECT COUNT(*) as count FROM bookings")->fetchArray(SQLITE3_ASSOC)['count'];
 $homeofficeCount = $dbConnection->query("SELECT COUNT(*) as count FROM bookings WHERE location = 'homeoffice'")->fetchArray(SQLITE3_ASSOC)['count'];
 $officeCount = $dbConnection->query("SELECT COUNT(*) as count FROM bookings WHERE location = 'office'")->fetchArray(SQLITE3_ASSOC)['count'];
+$workTotal = $homeofficeCount + $officeCount; // neutral types are excluded
 
 // Calculate percentages
-$homeofficePercentage = $totalBookings > 0 ? round(($homeofficeCount / $totalBookings) * 100) : 0;
-$officePercentage = $totalBookings > 0 ? round(($officeCount / $totalBookings) * 100) : 0;
+$homeofficePercentage = $workTotal > 0 ? round(($homeofficeCount / $workTotal) * 100) : 0;
+$officePercentage = $workTotal > 0 ? round(($officeCount / $workTotal) * 100) : 0;
 ?>
 
 <!-- Welcome Section -->
