@@ -5,22 +5,35 @@ $db = new Database();
 $messages = ['success' => [], 'error' => []];
 
 // Bestimme die aktuelle Kalenderwoche basierend auf GET oder POST Parameter oder aktuellem Datum
-$selectedWeek = isset($_POST['week']) ? $_POST['week'] : (isset($_GET['week']) ? $_GET['week'] : date('W'));
-$selectedYear = isset($_POST['year']) ? $_POST['year'] : (isset($_GET['year']) ? $_GET['year'] : date('Y'));
+// Wichtig: Bei ISO-Wochen kann das Jahr abweichen (z.B. 29.12.2025 = KW1/2026)
+if (isset($_POST['week']) && isset($_POST['year'])) {
+    $selectedWeek = (int)$_POST['week'];
+    $selectedYear = (int)$_POST['year'];
+} elseif (isset($_GET['week']) && isset($_GET['year'])) {
+    $selectedWeek = (int)$_GET['week'];
+    $selectedYear = (int)$_GET['year'];
+} else {
+    // Aktuelles Datum - nutze ISO-Wochenjahr
+    $now = new DateTime();
+    $selectedWeek = (int)$now->format('W');
+    $selectedYear = (int)$now->format('o'); // 'o' = ISO-Wochenjahr (nicht 'Y'!)
+}
 
 // Berechne das Datum des Montags der ausgewählten Woche
 $monday = new DateTime();
 $monday->setISODate($selectedYear, $selectedWeek);
 $mondayTimestamp = $monday->getTimestamp();
 
-// Berechne vorherige und nächste Woche
-$prevWeek = new DateTime();
-$prevWeek->setISODate($selectedYear, $selectedWeek);
+// Berechne vorherige und nächste Woche (mit korrektem ISO-Jahr)
+$prevWeek = clone $monday;
 $prevWeek->modify('-1 week');
+$prevWeekNum = (int)$prevWeek->format('W');
+$prevWeekYear = (int)$prevWeek->format('o');
 
-$nextWeek = new DateTime();
-$nextWeek->setISODate($selectedYear, $selectedWeek);
+$nextWeek = clone $monday;
 $nextWeek->modify('+1 week');
+$nextWeekNum = (int)$nextWeek->format('W');
+$nextWeekYear = (int)$nextWeek->format('o');
 
 // Lade die Buchungen für die ausgewählte Woche VOR der POST-Verarbeitung
 $dates = [];
@@ -132,7 +145,7 @@ include 'templates/header.php';
     <!-- Week Navigator -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-6 transition-colors duration-200">
         <div class="flex items-center justify-between">
-            <a href="?week=<?php echo $prevWeek->format('W'); ?>&year=<?php echo $prevWeek->format('Y'); ?>" 
+            <a href="?week=<?php echo $prevWeekNum; ?>&year=<?php echo $prevWeekYear; ?>" 
                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all hover:scale-110 active:scale-95">
                 <i class="material-icons">chevron_left</i>
             </a>
@@ -140,7 +153,7 @@ include 'templates/header.php';
             <div class="text-center">
                 <div class="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
                     <i class="material-icons text-indigo-500 dark:text-indigo-400 text-lg">calendar_today</i>
-                    KW <?php echo $selectedWeek; ?>
+                    KW <?php echo $selectedWeek; ?><?php if ($selectedYear != date('Y')): ?> <span class="text-sm font-normal text-gray-400"><?php echo $selectedYear; ?></span><?php endif; ?>
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
                     <?php echo $weekStartDisplay; ?> – <?php echo $weekEndDisplay; ?>
@@ -153,13 +166,18 @@ include 'templates/header.php';
             </div>
 
             <div class="flex items-center gap-2">
-                <?php if ($selectedWeek != date('W') || $selectedYear != date('Y')) { ?>
-                    <a href="?week=<?php echo date('W'); ?>&year=<?php echo date('Y'); ?>" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                <?php 
+                $now = new DateTime();
+                $currentWeek = (int)$now->format('W');
+                $currentWeekYear = (int)$now->format('o');
+                if ($selectedWeek != $currentWeek || $selectedYear != $currentWeekYear): 
+                ?>
+                    <a href="?week=<?php echo $currentWeek; ?>&year=<?php echo $currentWeekYear; ?>" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
                         <i class="material-icons text-sm mr-1">today</i>
                         Heute
                     </a>
-                <?php } ?>
-                <a href="?week=<?php echo $nextWeek->format('W'); ?>&year=<?php echo $nextWeek->format('Y'); ?>" 
+                <?php endif; ?>
+                <a href="?week=<?php echo $nextWeekNum; ?>&year=<?php echo $nextWeekYear; ?>" 
                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all hover:scale-110 active:scale-95">
                     <i class="material-icons">chevron_right</i>
                 </a>

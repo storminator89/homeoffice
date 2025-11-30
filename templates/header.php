@@ -94,6 +94,9 @@ if (!isset($_SESSION['user_id']) && !in_array($currentPage, $publicPages)) {
                         <a href="evaluation.php" class="<?php echo $currentPage == 'evaluation.php' ? 'border-indigo-500 text-gray-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200'; ?> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
                             Auswertung
                         </a>
+                        <a href="webhooks.php" class="<?php echo $currentPage == 'webhooks.php' ? 'border-indigo-500 text-gray-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200'; ?> inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            Webhooks
+                        </a>
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center gap-4">

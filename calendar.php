@@ -117,9 +117,9 @@ include 'templates/header.php';
                                 case 'training': $badge = '<div class="mt-1 px-2 py-1 rounded text-xs font-medium bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 truncate flex items-center gap-1"><i class="material-icons text-[10px]">school</i> Schulung</div>'; break;
                             }
 
-                            // Link zur Buchungswoche
+                            // Link zur Buchungswoche - nutze ISO-Wochenjahr (format 'o')
                             $week = (int)$cursor->format('W');
-                            $yForWeek = (int)$cursor->format('Y');
+                            $yForWeek = (int)$cursor->format('o'); // 'o' = ISO-Wochenjahr
                             $link = 'booking.php?week=' . $week . '&year=' . $yForWeek;
 
                             echo '<td class="h-32 border border-gray-100 dark:border-gray-700 p-2 align-top transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ' . $bgClass . '">';
