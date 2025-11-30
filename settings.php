@@ -6,10 +6,13 @@ $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['quota'])) {
+    if (isset($_POST['save_settings'])) {
         $quota = (int)$_POST['quota'];
+        $vacation = (int)$_POST['vacation'];
+        
         if ($quota >= 0 && $quota <= 100) {
             $db->setSetting('homeoffice_quota', $quota);
+            $db->setSetting('vacation_days', $vacation);
             $success = 'Einstellungen gespeichert.';
         } else {
             $error = 'Quote muss zwischen 0 und 100 liegen.';
@@ -35,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $currentQuota = $db->getSetting('homeoffice_quota');
+$currentVacation = $db->getSetting('vacation_days');
 
 include 'templates/header.php';
 ?>
@@ -93,9 +97,22 @@ include 'templates/header.php';
                     </p>
                 </div>
 
+                <div>
+                    <label for="vacation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Jahresurlaub (Tage)
+                    </label>
+                    <div class="mt-1">
+                        <input type="number" id="vacation" name="vacation" min="0" max="365" value="<?php echo $currentVacation; ?>" 
+                               class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Ihr Urlaubsanspruch pro Jahr.
+                    </p>
+                </div>
+
                 <div class="pt-5 border-t border-gray-100 dark:border-gray-700">
                     <div class="flex justify-end">
-                        <button type="submit" name="quota" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        <button type="submit" name="save_settings" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                             Speichern
                         </button>
                     </div>

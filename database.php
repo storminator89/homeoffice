@@ -64,19 +64,27 @@ class Database {
 
         // Insert default settings if they don't exist
         $this->setSetting('homeoffice_quota', '50', false);
+        $this->setSetting('vacation_days', '30', false);
+        
+        // Migration: Add note column to bookings if not exists
+        $cols = $this->db->query("PRAGMA table_info(bookings)");
+        $hasNote = false;
+        while ($col = $cols->fetchArray(SQLITE3_ASSOC)) {
+            if ($col['name'] === 'note') {
+                $hasNote = true;
+                break;
+            }
+        }
+        
+        if (!$hasNote) {
+            $this->db->exec("ALTER TABLE bookings ADD COLUMN note TEXT DEFAULT ''");
+        }
     }
 
     public function validateBooking($date, $location) {
         $errors = [];
         
-        // Prüfe ob das Datum in der Zukunft liegt
         $bookingDate = new DateTime($date);
-        $today = new DateTime();
-        $today->setTime(0, 0, 0); // Setze Zeit auf Mitternacht für korrekten Vergleich
-        
-        if ($bookingDate > $today) {
-            $errors[] = "Buchungen können nicht für zukünftige Daten vorgenommen werden.";
-        }
         
         // Prüfe ob es ein Arbeitstag (Montag-Freitag) ist
         $dayOfWeek = $bookingDate->format('N'); // 1 (Montag) bis 7 (Sonntag)
@@ -93,7 +101,7 @@ class Database {
         return $errors;
     }
 
-    public function addBooking($date, $location) {
+    public function addBooking($date, $location, $note = '') {
         // Wenn location leer ist, nur löschen ohne Validierung
         if (empty($location)) {
             $deleteStmt = $this->db->prepare('DELETE FROM bookings WHERE date = :date');
@@ -121,9 +129,10 @@ class Database {
         }
 
         // Füge neue Buchung hinzu
-        $insertStmt = $this->db->prepare('INSERT INTO bookings (date, location) VALUES (:date, :location)');
+        $insertStmt = $this->db->prepare('INSERT INTO bookings (date, location, note) VALUES (:date, :location, :note)');
         $insertStmt->bindValue(':date', $date, SQLITE3_TEXT);
         $insertStmt->bindValue(':location', $location, SQLITE3_TEXT);
+        $insertStmt->bindValue(':note', $note, SQLITE3_TEXT);
         return $insertStmt->execute();
     }
 
@@ -139,7 +148,7 @@ class Database {
 
     public function getBookingsForDates($dates) {
         $placeholders = str_repeat('?,', count($dates) - 1) . '?';
-        $stmt = $this->db->prepare("SELECT date, location FROM bookings WHERE date IN ($placeholders)");
+        $stmt = $this->db->prepare("SELECT date, location, note FROM bookings WHERE date IN ($placeholders)");
         
         foreach ($dates as $index => $date) {
             $stmt->bindValue($index + 1, $date, SQLITE3_TEXT);
@@ -149,7 +158,10 @@ class Database {
         $bookings = [];
         
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-            $bookings[$row['date']] = $row['location'];
+            $bookings[$row['date']] = [
+                'location' => $row['location'],
+                'note' => $row['note']
+            ];
         }
         
         return $bookings;

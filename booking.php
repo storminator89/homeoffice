@@ -41,7 +41,7 @@ $weekCounts = [
     'none' => 0
 ];
 foreach ($dates as $d) {
-    $val = isset($existingBookings[$d]) ? $existingBookings[$d] : '';
+    $val = isset($existingBookings[$d]) ? $existingBookings[$d]['location'] : '';
     if ($val === '' || $val === null) {
         $weekCounts['none']++;
     } elseif (isset($weekCounts[$val])) {
@@ -57,29 +57,62 @@ $weekStartDisplay = date('d.m.Y', strtotime($dates[0]));
 $weekEndDisplay   = date('d.m.Y', strtotime(end($dates)));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    foreach ($_POST['location'] as $date => $location) {
-        $dateObj = DateTime::createFromFormat('d.m.Y', $date);
-        if ($dateObj) {
-            try {
-                $dbDate = $dateObj->format('Y-m-d');
-                $currentLocation = isset($existingBookings[$dbDate]) ? $existingBookings[$dbDate] : '';
-                
-                // Nur wenn sich der Wert tatsächlich geändert hat
-                if ($location !== $currentLocation) {
-                    $db->addBooking($dbDate, $location);
-                    if (!empty($location)) {
-                        $messages['success'][] = "Buchung für " . $date . " gespeichert.";
-                    } elseif (!empty($currentLocation)) {
-                        $messages['success'][] = "Buchung für " . $date . " entfernt.";
-                    }
+    if (isset($_POST['copy_last_week'])) {
+        // Calculate last week dates
+        $lastWeekDates = [];
+        foreach ($dates as $date) {
+            $lastWeekDates[] = date('Y-m-d', strtotime($date . ' -7 days'));
+        }
+        $lastWeekBookings = $db->getBookingsForDates($lastWeekDates);
+        
+        $copyCount = 0;
+        foreach ($dates as $i => $currentDate) {
+            $lastWeekDate = $lastWeekDates[$i];
+            if (isset($lastWeekBookings[$lastWeekDate])) {
+                $booking = $lastWeekBookings[$lastWeekDate];
+                // Only copy if there is a location set
+                if (!empty($booking['location'])) {
+                    $db->addBooking($currentDate, $booking['location'], $booking['note']);
+                    $copyCount++;
                 }
-            } catch (Exception $e) {
-                $messages['error'][] = "Fehler am " . $date . ": " . $e->getMessage();
             }
         }
+        if ($copyCount > 0) {
+            $messages['success'][] = "$copyCount Tage aus der Vorwoche übernommen.";
+        } else {
+            $messages['error'][] = "Keine Einträge in der Vorwoche gefunden.";
+        }
+        // Refresh existing bookings
+        $existingBookings = $db->getBookingsForDates($dates);
+    } elseif (isset($_POST['location'])) {
+        foreach ($_POST['location'] as $date => $location) {
+            $dateObj = DateTime::createFromFormat('d.m.Y', $date);
+            if ($dateObj) {
+                try {
+                    $dbDate = $dateObj->format('Y-m-d');
+                    $note = $_POST['note'][$date] ?? '';
+                    
+                    $currentBooking = isset($existingBookings[$dbDate]) ? $existingBookings[$dbDate] : null;
+                    $currentLocation = $currentBooking ? $currentBooking['location'] : '';
+                    $currentNote = $currentBooking ? $currentBooking['note'] : '';
+                    
+                    // Nur wenn sich der Wert tatsächlich geändert hat
+                    if ($location !== $currentLocation || $note !== $currentNote) {
+                        $db->addBooking($dbDate, $location, $note);
+                        if (!empty($location)) {
+                            $messages['success'][] = "Buchung für " . $date . " gespeichert.";
+                        } elseif (!empty($currentLocation)) {
+                            $messages['success'][] = "Buchung für " . $date . " entfernt.";
+                        }
+                    }
+                } catch (Exception $e) {
+                    $messages['error'][] = "Fehler am " . $date . ": " . $e->getMessage();
+                }
+            }
+        }
+        // Lade die aktualisierten Buchungen nach der Verarbeitung
+        $existingBookings = $db->getBookingsForDates($dates);
     }
-    // Lade die aktualisierten Buchungen nach der Verarbeitung
-    $existingBookings = $db->getBookingsForDates($dates);
 }
 
 include 'templates/header.php';
@@ -146,6 +179,10 @@ include 'templates/header.php';
                 <button type="button" onclick="setWeek('')" class="px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center gap-1">
                     <i class="material-icons text-sm">block</i> Leeren
                 </button>
+                <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2"></div>
+                <button type="submit" name="copy_last_week" class="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center gap-1 whitespace-nowrap">
+                    <i class="material-icons text-sm">content_copy</i> Vorwoche kopieren
+                </button>
             </div>
         </div>
         
@@ -159,7 +196,9 @@ include 'templates/header.php';
                     'Thursday' => 'Donnerstag', 'Friday' => 'Freitag'
                 ];
                 
-                $existingLocation = isset($existingBookings[$dbDate]) ? $existingBookings[$dbDate] : '';
+                $existingBooking = isset($existingBookings[$dbDate]) ? $existingBookings[$dbDate] : null;
+                $existingLocation = $existingBooking ? $existingBooking['location'] : '';
+                $existingNote = $existingBooking ? $existingBooking['note'] : '';
                 $isToday = date('Y-m-d') === $dbDate;
                 
                 $statusColors = [
@@ -225,6 +264,13 @@ include 'templates/header.php';
                                         </div>
                                     </label>
                                 <?php } ?>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Notiz</label>
+                                <input type="text" name="note[<?php echo $displayDate; ?>]" value="<?php echo htmlspecialchars($existingNote); ?>" 
+                                       class="w-full text-sm border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                                       placeholder="z.B. Meeting, Handwerker...">
                             </div>
                         </div>
                     </details>

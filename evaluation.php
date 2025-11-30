@@ -7,12 +7,54 @@ $quarter = isset($_GET['quarter']) ? (int)$_GET['quarter'] : ceil(date('n') / 3)
 
 $quotaStatus = $db->getQuarterQuotaStatus($year, $quarter);
 
+// Vacation Stats
+$totalVacation = (int)$db->getSetting('vacation_days');
+$takenVacation = $db->getDb()->querySingle("SELECT COUNT(*) FROM bookings WHERE location = 'vacation' AND strftime('%Y', date) = '$year'");
+$remainingVacation = $totalVacation - $takenVacation;
+
+// Sick Days Stats
+$sickDays = $db->getDb()->querySingle("SELECT COUNT(*) FROM bookings WHERE location = 'sick' AND strftime('%Y', date) = '$year'");
+
 include 'templates/header.php';
 ?>
 
 <div class="max-w-6xl mx-auto">
     <!-- Header & Quota Status -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Vacation Stats -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
+            <div class="mb-2 text-purple-500 dark:text-purple-400">
+                <i class="material-icons text-4xl">beach_access</i>
+            </div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1"><?php echo $remainingVacation; ?></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Resturlaub</div>
+            
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
+                <div class="bg-purple-500 dark:bg-purple-400 h-2.5 rounded-full" style="width: <?php echo $totalVacation > 0 ? ($takenVacation / $totalVacation * 100) : 0; ?>%"></div>
+            </div>
+            
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+                <?php echo $takenVacation; ?> von <?php echo $totalVacation; ?> genommen
+            </span>
+        </div>
+
+        <!-- Sick Days -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
+            <div class="mb-2 text-red-500 dark:text-red-400">
+                <i class="material-icons text-4xl">healing</i>
+            </div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1"><?php echo $sickDays; ?></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Krankheitstage</div>
+            
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
+                <div class="bg-red-500 dark:bg-red-400 h-2.5 rounded-full" style="width: 100%"></div>
+            </div>
+            
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                in <?php echo $year; ?>
+            </span>
+        </div>
+
         <!-- Actual Quota -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
             <div class="mb-2 <?php echo $quotaStatus['status'] === 'ok' ? 'text-green-500' : 'text-orange-500'; ?>">
