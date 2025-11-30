@@ -133,26 +133,34 @@ include 'templates/header.php';
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-6 transition-colors duration-200">
         <div class="flex items-center justify-between">
             <a href="?week=<?php echo $prevWeek->format('W'); ?>&year=<?php echo $prevWeek->format('Y'); ?>" 
-               class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+               class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all hover:scale-110 active:scale-95">
                 <i class="material-icons">chevron_left</i>
             </a>
             
             <div class="text-center">
-                <div class="text-lg font-bold text-gray-900 dark:text-white">KW <?php echo $selectedWeek; ?></div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
+                    <i class="material-icons text-indigo-500 dark:text-indigo-400 text-lg">calendar_today</i>
+                    KW <?php echo $selectedWeek; ?>
+                </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
-                    <i class="material-icons text-sm">date_range</i>
                     <?php echo $weekStartDisplay; ?> – <?php echo $weekEndDisplay; ?>
+                </div>
+                <!-- Week Progress Badge -->
+                <div class="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium <?php echo $weekSet >= 5 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'; ?>">
+                    <i class="material-icons text-xs"><?php echo $weekSet >= 5 ? 'check_circle' : 'schedule'; ?></i>
+                    <?php echo $weekSet; ?>/5 geplant
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
                 <?php if ($selectedWeek != date('W') || $selectedYear != date('Y')) { ?>
                     <a href="?week=<?php echo date('W'); ?>&year=<?php echo date('Y'); ?>" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
-                        Aktuelle Woche
+                        <i class="material-icons text-sm mr-1">today</i>
+                        Heute
                     </a>
                 <?php } ?>
                 <a href="?week=<?php echo $nextWeek->format('W'); ?>&year=<?php echo $nextWeek->format('Y'); ?>" 
-                   class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                   class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all hover:scale-110 active:scale-95">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </div>
@@ -278,8 +286,8 @@ include 'templates/header.php';
             <?php } ?>
         </div>
         
-        <div class="sticky bottom-4 mt-6 flex justify-center z-40">
-            <button class="shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 transition-transform hover:scale-105 active:scale-95" type="submit">
+        <div class="sticky bottom-4 mt-6 flex justify-center z-40 pb-safe">
+            <button class="shadow-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 transition-all hover:scale-105 active:scale-95 hover:shadow-indigo-500/30" type="submit">
                 <i class="material-icons">save</i>
                 <span>Speichern</span>
             </button>

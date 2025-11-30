@@ -20,17 +20,29 @@ include 'templates/header.php';
 
 <div class="max-w-6xl mx-auto">
     <!-- Header & Quota Status -->
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                <i class="material-icons text-2xl">analytics</i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Auswertung</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Detaillierte Statistiken und Berichte</p>
+            </div>
+        </div>
+    </div>
+    
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <!-- Vacation Stats -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
-            <div class="mb-2 text-purple-500 dark:text-purple-400">
-                <i class="material-icons text-4xl">beach_access</i>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
+            <div class="mb-2 p-3 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-500 dark:text-purple-400">
+                <i class="material-icons text-3xl">beach_access</i>
             </div>
             <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1"><?php echo $remainingVacation; ?></div>
             <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Resturlaub</div>
             
-            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
-                <div class="bg-purple-500 dark:bg-purple-400 h-2.5 rounded-full" style="width: <?php echo $totalVacation > 0 ? ($takenVacation / $totalVacation * 100) : 0; ?>%"></div>
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full transition-all duration-500" style="width: <?php echo $totalVacation > 0 ? ($takenVacation / $totalVacation * 100) : 0; ?>%"></div>
             </div>
             
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
@@ -39,15 +51,15 @@ include 'templates/header.php';
         </div>
 
         <!-- Sick Days -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
-            <div class="mb-2 text-red-500 dark:text-red-400">
-                <i class="material-icons text-4xl">healing</i>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
+            <div class="mb-2 p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400">
+                <i class="material-icons text-3xl">healing</i>
             </div>
             <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1"><?php echo $sickDays; ?></div>
             <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Krankheitstage</div>
             
-            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
-                <div class="bg-red-500 dark:bg-red-400 h-2.5 rounded-full" style="width: 100%"></div>
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-500 to-red-600 h-2.5 rounded-full" style="width: <?php echo min(100, $sickDays * 10); ?>%"></div>
             </div>
             
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
@@ -56,15 +68,15 @@ include 'templates/header.php';
         </div>
 
         <!-- Actual Quota -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
-            <div class="mb-2 <?php echo $quotaStatus['status'] === 'ok' ? 'text-green-500' : 'text-orange-500'; ?>">
-                <i class="material-icons text-4xl"><?php echo $quotaStatus['status'] === 'ok' ? 'check_circle' : 'warning'; ?></i>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
+            <div class="mb-2 p-3 rounded-full <?php echo $quotaStatus['status'] === 'ok' ? 'bg-green-100 dark:bg-green-900/30 text-green-500 dark:text-green-400' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-500 dark:text-orange-400'; ?>">
+                <i class="material-icons text-3xl"><?php echo $quotaStatus['status'] === 'ok' ? 'check_circle' : 'warning'; ?></i>
             </div>
             <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1"><?php echo $quotaStatus['actual']; ?>%</div>
             <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Aktuelle Quote</div>
             
-            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
-                <div class="bg-indigo-600 dark:bg-indigo-500 h-2.5 rounded-full" style="width: <?php echo min(100, $quotaStatus['actual']); ?>%"></div>
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: <?php echo min(100, $quotaStatus['actual']); ?>%"></div>
             </div>
             
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $quotaStatus['status'] === 'ok' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'; ?>">
@@ -79,15 +91,15 @@ include 'templates/header.php';
         </div>
 
         <!-- Target Quota -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-colors duration-200">
-            <div class="mb-2 text-indigo-500 dark:text-indigo-400">
-                <i class="material-icons text-4xl">target</i>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center transition-all duration-200 hover:shadow-md hover:scale-[1.02]">
+            <div class="mb-2 p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-500 dark:text-indigo-400">
+                <i class="material-icons text-3xl">flag</i>
             </div>
             <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1"><?php echo $quotaStatus['target']; ?>%</div>
             <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Ziel-Quote</div>
             
-            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
-                <div class="bg-indigo-400 dark:bg-indigo-600 h-2.5 rounded-full" style="width: <?php echo $quotaStatus['target']; ?>%"></div>
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-400 to-indigo-500 h-2.5 rounded-full" style="width: <?php echo $quotaStatus['target']; ?>%"></div>
             </div>
             
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300">
@@ -96,22 +108,26 @@ include 'templates/header.php';
         </div>
 
         <!-- Info -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col justify-center transition-colors duration-200">
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    <i class="material-icons text-indigo-500 dark:text-indigo-400 text-3xl">info</i>
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-6 flex flex-col justify-center text-white col-span-1 md:col-span-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div class="p-3 rounded-xl bg-white/20 backdrop-blur">
+                    <i class="material-icons text-3xl">lightbulb</i>
                 </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Info</h3>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        Die Quote berechnet sich aus dem Verhältnis von Homeoffice-Tagen zu Gesamtarbeitstagen im Quartal.
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium">Tipp zur Quote</h3>
+                    <p class="mt-1 text-sm text-white/80">
+                        Die Quote berechnet sich aus dem Verhältnis von Homeoffice-Tagen zu Gesamtarbeitstagen (Homeoffice + Büro) im Quartal.
                         <?php if ($quotaStatus['target'] <= 50): ?>
-                            Dein Ziel von <?php echo $quotaStatus['target']; ?>% liegt im empfohlenen Bereich.
+                            Dein Ziel von <?php echo $quotaStatus['target']; ?>% liegt im empfohlenen Bereich für eine gute Work-Life-Balance.
                         <?php else: ?>
-                            Dein Ziel liegt über 50%.
+                            Bei einer Quote über 50% solltest du regelmäßige Büropräsenz für Teamarbeit einplanen.
                         <?php endif; ?>
                     </p>
                 </div>
+                <a href="settings.php" class="shrink-0 px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-sm font-medium flex items-center gap-2">
+                    <i class="material-icons text-lg">tune</i>
+                    Ziel anpassen
+                </a>
             </div>
         </div>
     </div>

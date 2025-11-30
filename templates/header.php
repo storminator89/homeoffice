@@ -41,11 +41,31 @@ if (!isset($_SESSION['user_id']) && !in_array($currentPage, $publicPages)) {
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
         .material-icons { vertical-align: middle; }
+        
+        /* Smooth page transitions */
+        .page-transition { animation: pageIn 0.3s ease-out; }
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Button press effect */
+        .btn-press:active { transform: scale(0.97); }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
+<body class="h-full flex flex-col text-slate-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 page-transition">
 
     <!-- Navigation -->
     <?php if (isset($_SESSION['user_id'])): ?>
@@ -54,9 +74,11 @@ if (!isset($_SESSION['user_id']) && !in_array($currentPage, $publicPages)) {
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="index.php" class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-xl">
-                            <i class="material-icons">work_outline</i>
-                            <span>Homeoffice</span>
+                        <a href="index.php" class="flex items-center gap-2 font-bold text-xl group">
+                            <div class="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                                <i class="material-icons">work_outline</i>
+                            </div>
+                            <span class="gradient-text">Homeoffice</span>
                         </a>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">

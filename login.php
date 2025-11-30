@@ -84,16 +84,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 </head>
-<body class="h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+<body class="h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 transition-colors duration-200">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="flex justify-center text-indigo-600 dark:text-indigo-400">
-            <i class="material-icons text-5xl">work_outline</i>
+        <div class="flex justify-center">
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/30">
+                <i class="material-icons text-5xl">work_outline</i>
+            </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             Homeoffice Tracker
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            <?php echo $hasUsers ? 'Bitte melden Sie sich an' : 'Erstellen Sie den ersten Benutzer'; ?>
+            <?php echo $hasUsers ? 'Willkommen zurück!' : 'Erstellen Sie Ihr Konto'; ?>
         </p>
     </div>
 
@@ -154,8 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div>
-                    <button type="submit" name="<?php echo $hasUsers ? 'login' : 'register'; ?>" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        <?php echo $hasUsers ? 'Anmelden' : 'Registrieren'; ?>
+                    <button type="submit" name="<?php echo $hasUsers ? 'login' : 'register'; ?>" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all hover:shadow-indigo-500/30 hover:scale-[1.02] active:scale-[0.98]">
+                        <i class="material-icons mr-2 text-lg"><?php echo $hasUsers ? 'login' : 'person_add'; ?></i>
+                        <?php echo $hasUsers ? 'Anmelden' : 'Konto erstellen'; ?>
                     </button>
                 </div>
             </form>

@@ -33,37 +33,49 @@ include 'templates/header.php';
 <div class="max-w-6xl mx-auto">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
         <!-- Calendar Header -->
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <i class="material-icons text-indigo-600 dark:text-indigo-400">calendar_today</i>
-                <h2 class="text-lg font-bold text-gray-900 dark:text-white">Kalender</h2>
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800">
+            <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                    <i class="material-icons text-2xl">calendar_month</i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Kalender</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Jahresübersicht deiner Buchungen</p>
+                </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 bg-white dark:bg-gray-700 rounded-full px-2 py-1 shadow-sm">
                 <?php
                 $prev = (clone $firstOfMonth)->modify('-1 month');
                 $next = (clone $firstOfMonth)->modify('+1 month');
                 $months = [1=>'Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
                 ?>
-                <a href="?month=<?php echo (int)$prev->format('n'); ?>&year=<?php echo (int)$prev->format('Y'); ?>" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                <a href="?month=<?php echo (int)$prev->format('n'); ?>&year=<?php echo (int)$prev->format('Y'); ?>" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all hover:scale-110">
                     <i class="material-icons">chevron_left</i>
                 </a>
-                <span class="text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] text-center">
+                <span class="text-lg font-semibold text-gray-900 dark:text-white min-w-[160px] text-center px-4">
                     <?php echo $months[$month] . ' ' . $year; ?>
                 </span>
-                <a href="?month=<?php echo (int)$next->format('n'); ?>&year=<?php echo (int)$next->format('Y'); ?>" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                <a href="?month=<?php echo (int)$next->format('n'); ?>&year=<?php echo (int)$next->format('Y'); ?>" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all hover:scale-110">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </div>
+            
+            <?php if ($month != date('n') || $year != date('Y')): ?>
+            <a href="?month=<?php echo date('n'); ?>&year=<?php echo date('Y'); ?>" class="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-900/70 transition-colors">
+                <i class="material-icons text-sm mr-1">today</i>
+                Heute
+            </a>
+            <?php endif; ?>
         </div>
 
         <!-- Legend -->
         <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-500"></span> Homeoffice</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span> Büro</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Urlaub</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Krank</div>
-            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-teal-500"></span> Schulung</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/30"></span> Homeoffice</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-orange-500 shadow-sm shadow-orange-500/30"></span> Büro</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500 shadow-sm shadow-purple-500/30"></span> Urlaub</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 shadow-sm shadow-red-500/30"></span> Krank</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-teal-500 shadow-sm shadow-teal-500/30"></span> Schulung</div>
         </div>
 
         <!-- Calendar Grid -->

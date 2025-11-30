@@ -45,9 +45,16 @@ include 'templates/header.php';
 
 <div class="max-w-3xl mx-auto">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Einstellungen</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Verwalten Sie Ihre Homeoffice-Präferenzen.</p>
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800">
+            <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                    <i class="material-icons">settings</i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white">Einstellungen</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Verwalten Sie Ihre Homeoffice-Präferenzen.</p>
+                </div>
+            </div>
         </div>
 
         <div class="p-6">
@@ -158,17 +165,38 @@ include 'templates/header.php';
     </div>
     
     <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Über die App</h2>
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                <i class="material-icons text-gray-500 dark:text-gray-400">info</i>
+                Über die App
+            </h2>
         </div>
         <div class="p-6">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">Version</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">1.1.0 (Dark Mode Edition)</p>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">Homeoffice Tracker</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Version 1.2.0</p>
                 </div>
-                <div class="text-indigo-600 dark:text-indigo-400">
+                <div class="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30">
                     <i class="material-icons text-3xl">work_outline</i>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tastenkürzel</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                        <span class="text-gray-600 dark:text-gray-300">Dark Mode</span>
+                        <kbd class="px-2 py-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-mono">Ctrl + D</kbd>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                        <span class="text-gray-600 dark:text-gray-300">Dashboard</span>
+                        <kbd class="px-2 py-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-mono">Ctrl + H</kbd>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                        <span class="text-gray-600 dark:text-gray-300">Planung</span>
+                        <kbd class="px-2 py-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-mono">Ctrl + B</kbd>
+                    </div>
                 </div>
             </div>
         </div>
