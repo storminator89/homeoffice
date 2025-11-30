@@ -30,110 +30,103 @@ while ($row = $res->fetchArray(SQLITE3_ASSOC)) {
 include 'templates/header.php';
 ?>
 
-<div class="row">
-    <div class="col s12">
-        <div class="card">
-            <div class="card-content">
-                <div class="card-header blue darken-1 white-text" style="margin: -20px -20px 20px -20px; padding: 20px; display:flex; align-items:center; justify-content:space-between;">
-                    <div style="display:flex; align-items:center; gap:.5rem;">
-                        <i class="material-icons">calendar_today</i>
-                        <span class="card-title" style="margin:0;">Kalender</span>
-                    </div>
-                    <div>
-                        <?php
-                        $prev = (clone $firstOfMonth)->modify('-1 month');
-                        $next = (clone $firstOfMonth)->modify('+1 month');
-                        ?>
-                        <a href="?month=<?php echo (int)$prev->format('n'); ?>&year=<?php echo (int)$prev->format('Y'); ?>" class="btn-flat waves-effect white-text"><i class="material-icons">chevron_left</i></a>
-                        <span style="margin: 0 1rem; font-weight: 600;">
-                            <?php
-                            $months = [1=>'Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-                            echo $months[$month] . ' ' . $year;
-                            ?>
-                        </span>
-                        <a href="?month=<?php echo (int)$next->format('n'); ?>&year=<?php echo (int)$next->format('Y'); ?>" class="btn-flat waves-effect white-text"><i class="material-icons">chevron_right</i></a>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="row" style="margin-bottom: 1rem;">
-                        <div class="col s12">
-                            <div class="grey-text" style="display:flex; gap:1rem; flex-wrap:wrap;">
-                                <span><i class="material-icons tiny blue-text">home</i> Homeoffice</span>
-                                <span><i class="material-icons tiny orange-text">business</i> Büro</span>
-                                <span><i class="material-icons tiny purple-text">beach_access</i> Urlaub</span>
-                                <span><i class="material-icons tiny red-text">healing</i> Krank</span>
-                                <span><i class="material-icons tiny teal-text">school</i> Schulung</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="responsive-table">
-                        <table class="highlight" style="table-layout: fixed;">
-                            <thead>
-                                <tr>
-                                    <?php foreach (['Mo','Di','Mi','Do','Fr','Sa','So'] as $w): ?>
-                                        <th class="center-align"><?php echo $w; ?></th>
-                                    <?php endforeach; ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $cursor = clone $start;
-                                while ($cursor <= $end) {
-                                    echo '<tr>';
-                                    for ($d = 1; $d <= 7; $d++) {
-                                        $dateStr = $cursor->format('Y-m-d');
-                                        $isCurrentMonth = ((int)$cursor->format('n') === $month);
-                                        $isWeekend = ((int)$cursor->format('N') >= 6);
-                                        $classes = [];
-                                        if (!$isCurrentMonth) $classes[] = 'grey lighten-4';
-                                        if ($isWeekend) $classes[] = 'grey lighten-5';
-                                        $displayDay = (int)$cursor->format('j');
-
-                                        $loc = $map[$dateStr] ?? '';
-                                        $icon = 'radio_button_unchecked';
-                                        $color = 'grey-text';
-                                        $label = '';
-                                        switch ($loc) {
-                                            case 'homeoffice': $icon='home'; $color='blue-text'; $label='Homeoffice'; break;
-                                            case 'office': $icon='business'; $color='orange-text'; $label='Büro'; break;
-                                            case 'vacation': $icon='beach_access'; $color='purple-text'; $label='Urlaub'; break;
-                                            case 'sick': $icon='healing'; $color='red-text'; $label='Krank'; break;
-                                            case 'training': $icon='school'; $color='teal-text'; $label='Schulung'; break;
-                                        }
-
-                                        // Link zur Buchungswoche
-                                        $week = (int)$cursor->format('W');
-                                        $yForWeek = (int)$cursor->format('Y');
-                                        $link = 'booking.php?week=' . $week . '&year=' . $yForWeek;
-
-                                        echo '<td class="' . implode(' ', $classes) . '" style="vertical-align: top; height: 110px;">';
-                                        echo '<div style="padding:8px; display:flex; justify-content:space-between; align-items:center;">';
-                                        echo '<span class="' . ($isCurrentMonth ? '' : 'grey-text') . '">' . $displayDay . '</span>';
-                                        echo '<a href="' . $link . '" class="btn-flat btn-small tooltipped" data-tooltip="Zur Buchung">';
-                                        echo '<i class="material-icons">open_in_new</i></a></div>';
-
-                                        if ($label) {
-                                            echo '<div style="padding: 0 8px;">';
-                                            echo '<div class="chip ' . $color . ' white" style="height:auto; line-height:1.8;">';
-                                            echo '<i class="material-icons tiny ' . $color . '">' . $icon . '</i> ' . $label;
-                                            echo '</div></div>';
-                                        }
-                                        echo '</td>';
-                                        $cursor->modify('+1 day');
-                                    }
-                                    echo '</tr>';
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+        <!-- Calendar Header -->
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="material-icons text-indigo-600 dark:text-indigo-400">calendar_today</i>
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white">Kalender</h2>
             </div>
+            
+            <div class="flex items-center gap-4">
+                <?php
+                $prev = (clone $firstOfMonth)->modify('-1 month');
+                $next = (clone $firstOfMonth)->modify('+1 month');
+                $months = [1=>'Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+                ?>
+                <a href="?month=<?php echo (int)$prev->format('n'); ?>&year=<?php echo (int)$prev->format('Y'); ?>" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                    <i class="material-icons">chevron_left</i>
+                </a>
+                <span class="text-lg font-semibold text-gray-900 dark:text-white min-w-[140px] text-center">
+                    <?php echo $months[$month] . ' ' . $year; ?>
+                </span>
+                <a href="?month=<?php echo (int)$next->format('n'); ?>&year=<?php echo (int)$next->format('Y'); ?>" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                    <i class="material-icons">chevron_right</i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-500"></span> Homeoffice</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span> Büro</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Urlaub</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Krank</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-teal-500"></span> Schulung</div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse table-fixed min-w-[800px]">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-900/50">
+                        <?php foreach (['Mo','Di','Mi','Do','Fr','Sa','So'] as $w): ?>
+                            <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700"><?php echo $w; ?></th>
+                        <?php endforeach; ?>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800">
+                    <?php
+                    $cursor = clone $start;
+                    while ($cursor <= $end) {
+                        echo '<tr>';
+                        for ($d = 1; $d <= 7; $d++) {
+                            $dateStr = $cursor->format('Y-m-d');
+                            $isCurrentMonth = ((int)$cursor->format('n') === $month);
+                            $isWeekend = ((int)$cursor->format('N') >= 6);
+                            $isToday = ($dateStr === date('Y-m-d'));
+                            
+                            $bgClass = $isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900/50';
+                            if ($isWeekend && $isCurrentMonth) $bgClass = 'bg-gray-50/50 dark:bg-gray-800/50';
+                            if ($isToday) $bgClass = 'bg-indigo-50/30 dark:bg-indigo-900/20';
+                            
+                            $textClass = $isCurrentMonth ? 'text-gray-900 dark:text-gray-200' : 'text-gray-400 dark:text-gray-600';
+                            if ($isToday) $textClass = 'text-indigo-600 dark:text-indigo-400 font-bold';
+
+                            $loc = $map[$dateStr] ?? '';
+                            $badge = '';
+                            
+                            switch ($loc) {
+                                case 'homeoffice': $badge = '<div class="mt-1 px-2 py-1 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 truncate flex items-center gap-1"><i class="material-icons text-[10px]">home</i> Home</div>'; break;
+                                case 'office': $badge = '<div class="mt-1 px-2 py-1 rounded text-xs font-medium bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 truncate flex items-center gap-1"><i class="material-icons text-[10px]">business</i> Büro</div>'; break;
+                                case 'vacation': $badge = '<div class="mt-1 px-2 py-1 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 truncate flex items-center gap-1"><i class="material-icons text-[10px]">beach_access</i> Urlaub</div>'; break;
+                                case 'sick': $badge = '<div class="mt-1 px-2 py-1 rounded text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 truncate flex items-center gap-1"><i class="material-icons text-[10px]">healing</i> Krank</div>'; break;
+                                case 'training': $badge = '<div class="mt-1 px-2 py-1 rounded text-xs font-medium bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 truncate flex items-center gap-1"><i class="material-icons text-[10px]">school</i> Schulung</div>'; break;
+                            }
+
+                            // Link zur Buchungswoche
+                            $week = (int)$cursor->format('W');
+                            $yForWeek = (int)$cursor->format('Y');
+                            $link = 'booking.php?week=' . $week . '&year=' . $yForWeek;
+
+                            echo '<td class="h-32 border border-gray-100 dark:border-gray-700 p-2 align-top transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ' . $bgClass . '">';
+                            echo '<div class="flex justify-between items-start">';
+                            echo '<span class="text-sm ' . $textClass . '">' . (int)$cursor->format('j') . '</span>';
+                            echo '<a href="' . $link . '" class="text-gray-300 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"><i class="material-icons text-sm">edit</i></a>';
+                            echo '</div>';
+                            echo $badge;
+                            echo '</td>';
+                            
+                            $cursor->modify('+1 day');
+                        }
+                        echo '</tr>';
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <?php include 'templates/footer.php'; ?>
-

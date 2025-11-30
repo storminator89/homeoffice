@@ -247,6 +247,23 @@ class Database {
         return false;
     }
 
+    public function changePassword($userId, $currentPassword, $newPassword) {
+        $stmt = $this->db->prepare('SELECT password FROM users WHERE id = :id');
+        $stmt->bindValue(':id', $userId, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        $user = $result->fetchArray(SQLITE3_ASSOC);
+
+        if (!$user || !password_verify($currentPassword, $user['password'])) {
+            throw new Exception('Das aktuelle Passwort ist falsch.');
+        }
+
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $updateStmt = $this->db->prepare('UPDATE users SET password = :password WHERE id = :id');
+        $updateStmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
+        $updateStmt->bindValue(':id', $userId, SQLITE3_INTEGER);
+        return $updateStmt->execute();
+    }
+
     public function hasUsers() {
         $result = $this->db->query('SELECT COUNT(*) as count FROM users');
         $row = $result->fetchArray(SQLITE3_ASSOC);

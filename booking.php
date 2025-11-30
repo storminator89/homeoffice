@@ -68,11 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($location !== $currentLocation) {
                     $db->addBooking($dbDate, $location);
                     if (!empty($location)) {
-                        $messages['success'][] = "Buchung für " . $date . " auf " . 
-                            ($location === 'homeoffice' ? 'Homeoffice' : 'Büro') . " geändert.";
+                        $messages['success'][] = "Buchung für " . $date . " gespeichert.";
                     } elseif (!empty($currentLocation)) {
-                        // Nur eine Meldung anzeigen, wenn vorher eine Buchung existierte
-                        $messages['success'][] = "Buchung für " . $date . " wurde zurückgesetzt.";
+                        $messages['success'][] = "Buchung für " . $date . " entfernt.";
                     }
                 }
             } catch (Exception $e) {
@@ -87,251 +85,170 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include 'templates/header.php';
 ?>
 
-<div class="row">
-    <div class="col s12">
-        <?php if (!empty($messages)) { ?>
-            <script>
-                window.serverMessages = <?php echo json_encode($messages); ?>;
-            </script>
-        <?php } ?>
-        
-        <div class="card no-hover">
-            <div class="card-content">
-                <!-- Week Navigator -->
-                <div class="row" style="margin-bottom: 2rem;">
-                    <div class="col s12">
-                        <div class="card hero-card gradient-card week-navigator">
-                            <div class="card-content">
-                                <div class="week-toolbar">
-                                    <div class="nav left">
-                                        <a href="?week=<?php echo $prevWeek->format('W'); ?>&year=<?php echo $prevWeek->format('Y'); ?>" 
-                                           class="btn-floating btn-small waves-effect waves-light white">
-                                            <i class="material-icons blue-text text-darken-2">chevron_left</i>
-                                        </a>
-                                    </div>
-                                    <div class="center">
-                                        <div class="title-row">
-                                            <span class="kw">KW <?php echo $selectedWeek; ?></span>
-                                            <span class="year"><?php echo $selectedYear; ?></span>
-                                        </div>
-                                        <div class="sub">
-                                            <i class="material-icons tiny" style="vertical-align: text-bottom;">date_range</i>
-                                            <?php echo $weekStartDisplay; ?> – <?php echo $weekEndDisplay; ?>
-                                        </div>
-                                    </div>
-                                    <div class="nav right">
-                                        <?php if ($selectedWeek != date('W') || $selectedYear != date('Y')) { ?>
-                                            <a href="?week=<?php echo date('W'); ?>&year=<?php echo date('Y'); ?>" class="btn btn-outline-light btn-small hide-on-small-only">
-                                                <i class="material-icons left">today</i> Aktuelle Woche
-                                            </a>
-                                        <?php } ?>
-                                        <a href="?week=<?php echo $nextWeek->format('W'); ?>&year=<?php echo $nextWeek->format('Y'); ?>" 
-                                           class="btn-floating btn-small waves-effect waves-light white">
-                                            <i class="material-icons blue-text text-darken-2">chevron_right</i>
-                                        </a>
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        </div>
-                    </div>
+<div class="max-w-3xl mx-auto">
+    <?php if (!empty($messages['success'])): ?>
+        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
+            <ul class="list-disc list-inside">
+                <?php foreach ($messages['success'] as $msg): ?>
+                    <li><?php echo htmlspecialchars($msg); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <!-- Week Navigator -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-6 transition-colors duration-200">
+        <div class="flex items-center justify-between">
+            <a href="?week=<?php echo $prevWeek->format('W'); ?>&year=<?php echo $prevWeek->format('Y'); ?>" 
+               class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                <i class="material-icons">chevron_left</i>
+            </a>
+            
+            <div class="text-center">
+                <div class="text-lg font-bold text-gray-900 dark:text-white">KW <?php echo $selectedWeek; ?></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
+                    <i class="material-icons text-sm">date_range</i>
+                    <?php echo $weekStartDisplay; ?> – <?php echo $weekEndDisplay; ?>
                 </div>
+            </div>
 
-                <form method="post">
-                    <input type="hidden" name="week" value="<?php echo $selectedWeek; ?>">
-                    <input type="hidden" name="year" value="<?php echo $selectedYear; ?>">
-                    
-                    <!-- Schnellaktionen & Zusammenfassung -->
-                    <div class="row" style="margin-bottom: 1.5rem;">
-                        <div class="col s12">
-                            <div class="card-panel glass-panel sticky-actions" style="display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
-                                <span class="grey-text text-darken-1" style="margin-right: .5rem; display: inline-flex; align-items: center; gap: .4rem;">
-                                    <i class="material-icons">bolt</i> Woche komplett setzen
-                                </span>
-                                <div class="actions" style="display:flex; gap:.5rem; flex-wrap: wrap; align-items:center;">
-                                    <button type="button" class="btn blue waves-effect waves-light" data-week-action="homeoffice">
-                                        <i class="material-icons left">home</i> Homeoffice
-                                    </button>
-                                    <button type="button" class="btn orange waves-effect waves-light" data-week-action="office">
-                                        <i class="material-icons left">business</i> Büro
-                                    </button>
-                                    <button type="button" class="btn grey waves-effect waves-light" data-week-action="none">
-                                        <i class="material-icons left">block</i> Keine
-                                    </button>
-                                    <button type="button" class="btn purple waves-effect waves-light" data-week-action="vacation">
-                                        <i class="material-icons left">beach_access</i> Urlaub
-                                    </button>
-                                    <button type="button" class="btn red waves-effect waves-light" data-week-action="sick">
-                                        <i class="material-icons left">healing</i> Krank
-                                    </button>
-                                    <button type="button" class="btn teal waves-effect waves-light" data-week-action="training">
-                                        <i class="material-icons left">school</i> Schulung
-                                    </button>
-                                </div>
-
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col s12">
-                            <ul class="collapsible popout">
-                                <?php
-                                foreach ($dates as $i => $dbDate) {
-                                    $displayDate = date('d.m.Y', strtotime($dbDate));
-                                    $dayName = date('l', strtotime($dbDate));
-                                    $germanDays = [
-                                        'Monday' => 'Montag',
-                                        'Tuesday' => 'Dienstag',
-                                        'Wednesday' => 'Mittwoch',
-                                        'Thursday' => 'Donnerstag',
-                                        'Friday' => 'Freitag'
-                                    ];
-                                    
-                                    $existingLocation = isset($existingBookings[$dbDate]) ? $existingBookings[$dbDate] : '';
-                                    $isToday = date('Y-m-d') === $dbDate;
-                                    switch ($existingLocation) {
-                                        case 'homeoffice':
-                                            $icon = 'home';
-                                            $statusColor = 'blue-text';
-                                            $locationText = 'Homeoffice';
-                                            $statusClass = 'status-homeoffice';
-                                            break;
-                                        case 'office':
-                                            $icon = 'business';
-                                            $statusColor = 'orange-text';
-                                            $locationText = 'Büro';
-                                            $statusClass = 'status-office';
-                                            break;
-                                        case 'vacation':
-                                            $icon = 'beach_access';
-                                            $statusColor = 'purple-text';
-                                            $locationText = 'Urlaub';
-                                            $statusClass = 'status-vacation';
-                                            break;
-                                        case 'sick':
-                                            $icon = 'healing';
-                                            $statusColor = 'red-text';
-                                            $locationText = 'Krank';
-                                            $statusClass = 'status-sick';
-                                            break;
-                                        case 'training':
-                                            $icon = 'school';
-                                            $statusColor = 'teal-text';
-                                            $locationText = 'Schulung';
-                                            $statusClass = 'status-training';
-                                            break;
-                                        default:
-                                            $icon = 'radio_button_unchecked';
-                                            $statusColor = 'grey-text';
-                                            $locationText = 'Keine Angabe';
-                                            $statusClass = 'status-none';
-                                    }
-                                    ?>
-                                    <li class="day-item <?php echo $isToday ? 'active' : ''; ?> <?php echo $statusClass; ?>">
-                                        <div class="collapsible-header <?php echo $isToday ? 'blue lighten-5' : ''; ?> day-header" style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                                <i class="material-icons <?php echo $statusColor; ?>"><?php echo $icon; ?></i>
-                                                <div>
-                                                    <span class="<?php echo $isToday ? 'blue-text text-darken-2' : ''; ?>">
-                                                        <?php echo $germanDays[$dayName]; ?>
-                                                    </span>
-                                                    <span class="grey-text">
-                                                        <?php echo $displayDate; ?>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                                <span class="<?php echo $statusColor; ?> hide-on-small-only">
-                                                    <?php echo $locationText; ?>
-                                                </span>
-                                                <?php if ($isToday) { ?>
-                                                    <span class="new badge blue" data-badge-caption="Heute"></span>
-                                                <?php } ?>
-                                                <i class="material-icons grey-text">expand_more</i>
-                                            </div>
-                                        </div>
-                                        <div class="collapsible-body day-body">
-                                            <div class="row" style="margin-bottom: 0;">
-                                                <div class="col s12">
-                                                    <div class="segmented center-align">
-                                                        <label>
-                                                            <input name="location[<?php echo $displayDate; ?>]" type="radio" value="office" <?php echo $existingLocation === 'office' ? 'checked' : ''; ?>>
-                                                            <span class="pill orange-text text-darken-1">
-                                                                <i class="material-icons">business</i>
-                                                                Büro
-                                                            </span>
-                                                        </label>
-                                                        <label>
-                                                            <input name="location[<?php echo $displayDate; ?>]" type="radio" value="homeoffice" <?php echo $existingLocation === 'homeoffice' ? 'checked' : ''; ?>>
-                                                            <span class="pill blue-text text-darken-1">
-                                                                <i class="material-icons">home</i>
-                                                                Homeoffice
-                                                            </span>
-                                                        </label>
-                                                        <label>
-                                                            <input name="location[<?php echo $displayDate; ?>]" type="radio" value="vacation" <?php echo $existingLocation === 'vacation' ? 'checked' : ''; ?>>
-                                                            <span class="pill purple-text text-darken-1">
-                                                                <i class="material-icons">beach_access</i>
-                                                                Urlaub
-                                                            </span>
-                                                        </label>
-                                                        <label>
-                                                            <input name="location[<?php echo $displayDate; ?>]" type="radio" value="sick" <?php echo $existingLocation === 'sick' ? 'checked' : ''; ?>>
-                                                            <span class="pill red-text text-darken-1">
-                                                                <i class="material-icons">healing</i>
-                                                                Krank
-                                                            </span>
-                                                        </label>
-                                                        <label>
-                                                            <input name="location[<?php echo $displayDate; ?>]" type="radio" value="training" <?php echo $existingLocation === 'training' ? 'checked' : ''; ?>>
-                                                            <span class="pill teal-text text-darken-1">
-                                                                <i class="material-icons">school</i>
-                                                                Schulung
-                                                            </span>
-                                                        </label>
-                                                        <label>
-                                                            <input name="location[<?php echo $displayDate; ?>]" type="radio" value="" <?php echo $existingLocation === '' ? 'checked' : ''; ?>>
-                                                            <span class="pill grey-text text-darken-1">
-                                                                <i class="material-icons">block</i>
-                                                                Keine Angabe
-                                                            </span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                <?php } ?>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col s12 center-align" style="margin-top: 2rem;">
-                            <button class="btn-large waves-effect waves-light blue save-button" type="submit">
-                                <i class="material-icons left">save</i>
-                                Speichern
-                            </button>
-                        </div>
-                    </div>
-                </form>
+            <div class="flex items-center gap-2">
+                <?php if ($selectedWeek != date('W') || $selectedYear != date('Y')) { ?>
+                    <a href="?week=<?php echo date('W'); ?>&year=<?php echo date('Y'); ?>" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                        Aktuelle Woche
+                    </a>
+                <?php } ?>
+                <a href="?week=<?php echo $nextWeek->format('W'); ?>&year=<?php echo $nextWeek->format('Y'); ?>" 
+                   class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
+                    <i class="material-icons">chevron_right</i>
+                </a>
             </div>
         </div>
     </div>
+
+    <form method="post" id="bookingForm">
+        <input type="hidden" name="week" value="<?php echo $selectedWeek; ?>">
+        <input type="hidden" name="year" value="<?php echo $selectedYear; ?>">
+        
+        <!-- Quick Actions -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-6 overflow-x-auto transition-colors duration-200">
+            <div class="flex items-center gap-4 min-w-max">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <i class="material-icons text-sm">bolt</i>
+                    Woche setzen:
+                </span>
+                <button type="button" onclick="setWeek('homeoffice')" class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors flex items-center gap-1">
+                    <i class="material-icons text-sm">home</i> Homeoffice
+                </button>
+                <button type="button" onclick="setWeek('office')" class="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-sm font-medium hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors flex items-center gap-1">
+                    <i class="material-icons text-sm">business</i> Büro
+                </button>
+                <button type="button" onclick="setWeek('')" class="px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center gap-1">
+                    <i class="material-icons text-sm">block</i> Leeren
+                </button>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <?php
+            foreach ($dates as $i => $dbDate) {
+                $displayDate = date('d.m.Y', strtotime($dbDate));
+                $dayName = date('l', strtotime($dbDate));
+                $germanDays = [
+                    'Monday' => 'Montag', 'Tuesday' => 'Dienstag', 'Wednesday' => 'Mittwoch',
+                    'Thursday' => 'Donnerstag', 'Friday' => 'Freitag'
+                ];
+                
+                $existingLocation = isset($existingBookings[$dbDate]) ? $existingBookings[$dbDate] : '';
+                $isToday = date('Y-m-d') === $dbDate;
+                
+                $statusColors = [
+                    'homeoffice' => 'border-l-4 border-indigo-500 bg-indigo-50/30 dark:bg-indigo-900/20',
+                    'office' => 'border-l-4 border-orange-500 bg-orange-50/30 dark:bg-orange-900/20',
+                    'vacation' => 'border-l-4 border-purple-500 bg-purple-50/30 dark:bg-purple-900/20',
+                    'sick' => 'border-l-4 border-red-500 bg-red-50/30 dark:bg-red-900/20',
+                    'training' => 'border-l-4 border-teal-500 bg-teal-50/30 dark:bg-teal-900/20',
+                    '' => 'border-l-4 border-gray-200 dark:border-gray-700'
+                ];
+                $currentClass = $statusColors[$existingLocation] ?? $statusColors[''];
+                ?>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-200 <?php echo $currentClass; ?>">
+                    <details class="group" <?php echo $isToday ? 'open' : ''; ?>>
+                        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                            <div class="flex items-center gap-4">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-900 dark:text-white <?php echo $isToday ? 'text-indigo-600 dark:text-indigo-400' : ''; ?>">
+                                        <?php echo $germanDays[$dayName]; ?>
+                                    </span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400"><?php echo $displayDate; ?></span>
+                                </div>
+                                <?php if ($isToday): ?>
+                                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300">HEUTE</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-300 hidden sm:block location-label">
+                                    <?php 
+                                    $labels = [
+                                        'homeoffice' => 'Homeoffice', 'office' => 'Büro', 
+                                        'vacation' => 'Urlaub', 'sick' => 'Krank', 
+                                        'training' => 'Schulung', '' => 'Keine Angabe'
+                                    ];
+                                    echo $labels[$existingLocation] ?? 'Keine Angabe';
+                                    ?>
+                                </span>
+                                <i class="material-icons text-gray-400 dark:text-gray-500 transition-transform group-open:rotate-180">expand_more</i>
+                            </div>
+                        </summary>
+                        
+                        <div class="p-4 pt-0 border-t border-gray-50 dark:border-gray-700">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mt-4">
+                                <?php
+                                $options = [
+                                    ['value' => 'office', 'icon' => 'business', 'label' => 'Büro', 'color' => 'orange'],
+                                    ['value' => 'homeoffice', 'icon' => 'home', 'label' => 'Home', 'color' => 'indigo'],
+                                    ['value' => 'vacation', 'icon' => 'beach_access', 'label' => 'Urlaub', 'color' => 'purple'],
+                                    ['value' => 'sick', 'icon' => 'healing', 'label' => 'Krank', 'color' => 'red'],
+                                    ['value' => 'training', 'icon' => 'school', 'label' => 'Schulung', 'color' => 'teal'],
+                                    ['value' => '', 'icon' => 'block', 'label' => 'Leer', 'color' => 'gray']
+                                ];
+                                
+                                foreach ($options as $opt) {
+                                    $checked = $existingLocation === $opt['value'] ? 'checked' : '';
+                                    $colorClass = $opt['color'];
+                                    ?>
+                                    <label class="cursor-pointer relative">
+                                        <input type="radio" name="location[<?php echo $displayDate; ?>]" value="<?php echo $opt['value']; ?>" class="peer sr-only location-radio" <?php echo $checked; ?>>
+                                        <div class="flex flex-col items-center justify-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 peer-checked:border-<?php echo $colorClass; ?>-500 peer-checked:bg-<?php echo $colorClass; ?>-50 dark:peer-checked:bg-<?php echo $colorClass; ?>-900/30 peer-checked:text-<?php echo $colorClass; ?>-700 dark:peer-checked:text-<?php echo $colorClass; ?>-300 transition-all text-gray-600 dark:text-gray-300">
+                                            <i class="material-icons mb-1"><?php echo $opt['icon']; ?></i>
+                                            <span class="text-xs font-medium"><?php echo $opt['label']; ?></span>
+                                        </div>
+                                    </label>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            <?php } ?>
+        </div>
+        
+        <div class="sticky bottom-4 mt-6 flex justify-center z-40">
+            <button class="shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 transition-transform hover:scale-105 active:scale-95" type="submit">
+                <i class="material-icons">save</i>
+                <span>Speichern</span>
+            </button>
+        </div>
+    </form>
 </div>
 
-<!-- Floating Save Button -->
-<div class="fixed-action-btn">
-  <a class="btn-floating btn-large blue" id="fab-save" title="Speichern">
-    <i class="large material-icons">save</i>
-  </a>
-  <ul>
-    <li><a class="btn-floating grey tooltipped" data-tooltip="Woche leeren" data-week-action="none"><i class="material-icons">block</i></a></li>
-    <li><a class="btn-floating orange tooltipped" data-tooltip="Woche Büro" data-week-action="office"><i class="material-icons">business</i></a></li>
-    <li><a class="btn-floating blue tooltipped" data-tooltip="Woche Homeoffice" data-week-action="homeoffice"><i class="material-icons">home</i></a></li>
-  </ul>
-</div>
+<script>
+function setWeek(type) {
+    const radios = document.querySelectorAll(`input[type="radio"][value="${type}"]`);
+    radios.forEach(radio => {
+        radio.checked = true;
+        // Trigger change event visually if needed, though CSS handles peer-checked
+    });
+}
+</script>
 
 <?php include 'templates/footer.php'; ?>

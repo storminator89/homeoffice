@@ -1,196 +1,161 @@
 <?php
 require_once 'database.php';
-
 $db = new Database();
-$messages = ['success' => [], 'error' => []];
 
-// Verarbeite POST Request
+$success = '';
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['homeoffice_quota'])) {
-        $quota = filter_var($_POST['homeoffice_quota'], FILTER_VALIDATE_INT);
-        if ($quota !== false && $quota >= 0 && $quota <= 100) {
+    if (isset($_POST['quota'])) {
+        $quota = (int)$_POST['quota'];
+        if ($quota >= 0 && $quota <= 100) {
             $db->setSetting('homeoffice_quota', $quota);
-            $messages['success'][] = "Homeoffice-Quote wurde erfolgreich auf {$quota}% gesetzt.";
+            $success = 'Einstellungen gespeichert.';
         } else {
-            $messages['error'][] = "Bitte geben Sie einen gültigen Prozentwert zwischen 0 und 100 ein.";
+            $error = 'Quote muss zwischen 0 und 100 liegen.';
+        }
+    } elseif (isset($_POST['change_password'])) {
+        $current_password = $_POST['current_password'] ?? '';
+        $new_password = $_POST['new_password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
+
+        if ($new_password !== $confirm_password) {
+            $error = 'Die neuen Passwörter stimmen nicht überein.';
+        } elseif (strlen($new_password) < 6) {
+            $error = 'Das neue Passwort muss mindestens 6 Zeichen lang sein.';
+        } else {
+            try {
+                $db->changePassword($_SESSION['user_id'], $current_password, $new_password);
+                $success = 'Passwort erfolgreich geändert.';
+            } catch (Exception $e) {
+                $error = $e->getMessage();
+            }
         }
     }
 }
 
-// Lade aktuelle Einstellungen
 $currentQuota = $db->getSetting('homeoffice_quota');
 
 include 'templates/header.php';
 ?>
 
-<div class="row settings-view">
-    <div class="col s12">
-        <?php if (!empty($messages)) { ?>
-            <script>window.serverMessages = <?php echo json_encode($messages); ?>;</script>
-        <?php } ?>
-        
-        <div class="card">
-            <div class="card-content">
-                <div class="card-header blue darken-1 white-text" style="margin: -20px -20px 20px -20px; padding: 20px;">
-                    <span class="card-title" style="font-size: 2rem; display: flex; align-items: center;">
-                        <i class="material-icons" style="margin-right: 10px;">settings</i>
-                        Einstellungen
-                    </span>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Einstellungen</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Verwalten Sie Ihre Homeoffice-Präferenzen.</p>
+        </div>
+
+        <div class="p-6">
+            <?php if ($success): ?>
+                <div class="mb-4 bg-green-50 dark:bg-green-900/30 border-l-4 border-green-400 dark:border-green-600 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="material-icons text-green-400 dark:text-green-500">check_circle</i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700 dark:text-green-300"><?php echo htmlspecialchars($success); ?></p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+                <div class="mb-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-400 dark:border-red-600 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="material-icons text-red-400 dark:text-red-500">error</i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700 dark:text-red-300"><?php echo htmlspecialchars($error); ?></p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label for="quota" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Ziel-Homeoffice-Quote (%)
+                    </label>
+                    <div class="mt-1">
+                        <input type="range" id="quota" name="quota" min="0" max="100" value="<?php echo $currentQuota; ?>" 
+                               class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                               oninput="document.getElementById('quotaValue').innerText = this.value + '%'">
+                    </div>
+                    <div class="mt-2 flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <span>0%</span>
+                        <span id="quotaValue" class="font-bold text-indigo-600 dark:text-indigo-400"><?php echo $currentQuota; ?>%</span>
+                        <span>100%</span>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Legen Sie fest, wie viel Prozent Ihrer Arbeitszeit Sie im Homeoffice verbringen möchten.
+                    </p>
                 </div>
 
-                <div class="section">
-                    <form method="post" id="settingsForm">
-                        <div class="row">
-                            <div class="col s12 m8 offset-m2 l6 offset-l3">
-                                <div class="card-panel z-depth-2 hoverable" style="border-radius: 12px;">
-                                    <div class="input-field">
-                                        <i class="material-icons prefix blue-text">home</i>
-                                        <input type="number" 
-                                               id="homeoffice_quota" 
-                                               name="homeoffice_quota" 
-                                               value="<?php echo htmlspecialchars($currentQuota); ?>" 
-                                               min="0" 
-                                               max="100" 
-                                               required
-                                               class="validate"
-                                               style="font-size: 1.2rem;">
-                                        <label for="homeoffice_quota">Homeoffice-Quote (%)</label>
-                                        <span class="helper-text">Zwischen 0% und 100%</span>
-                                    </div>
+                <div class="pt-5 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-end">
+                        <button type="submit" name="quota" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                            Speichern
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                                    <div class="range-field" style="margin: 3rem 0;">
-                                        <input type="range" 
-                                               min="0" 
-                                               max="100" 
-                                               value="<?php echo htmlspecialchars($currentQuota); ?>"
-                                               oninput="updateQuota(this.value)"
-                                               class="blue">
-                                    </div>
-
-                                    <div class="quota-indicator center-align">
-                                        <div class="chip" id="quotaChip">
-                                            <i class="material-icons left tiny">info</i>
-                                            <span id="quotaText"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col s12 center-align">
-                                <button class="btn-large waves-effect waves-light blue darken-1 hoverable pulse" 
-                                        type="submit"
-                                        style="border-radius: 25px; padding: 0 2rem; margin-top: 1rem;">
-                                    <i class="material-icons left">save</i>
-                                    Einstellungen speichern
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Passwort ändern</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aktualisieren Sie Ihr Anmeldepasswort.</p>
+        </div>
+        <div class="p-6">
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Aktuelles Passwort</label>
+                    <div class="mt-1">
+                        <input type="password" name="current_password" id="current_password" required class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Neues Passwort</label>
+                    <div class="mt-1">
+                        <input type="password" name="new_password" id="new_password" required class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Neues Passwort bestätigen</label>
+                    <div class="mt-1">
+                        <input type="password" name="confirm_password" id="confirm_password" required class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+                <div class="pt-5 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-end">
+                        <button type="submit" name="change_password" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                            Passwort ändern
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Über die App</h2>
+        </div>
+        <div class="p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">Version</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">1.1.0 (Dark Mode Edition)</p>
+                </div>
+                <div class="text-indigo-600 dark:text-indigo-400">
+                    <i class="material-icons text-3xl">work_outline</i>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.input-field input[type=number]:focus {
-    border-bottom: 1px solid #1976D2 !important;
-    box-shadow: 0 1px 0 0 #1976D2 !important;
-}
-
-.input-field input[type=number]:focus + label {
-    color: #1976D2 !important;
-}
-
-.range-field input[type=range]::-webkit-slider-thumb {
-    background-color: #1976D2 !important;
-}
-
-.range-field input[type=range]::-moz-range-thumb {
-    background-color: #1976D2 !important;
-}
-
-.range-field input[type=range]::-ms-thumb {
-    background-color: #1976D2 !important;
-}
-
-.card {
-    border-radius: 12px;
-}
-
-.card-panel {
-    transition: all 0.3s ease-in-out;
-}
-
-.card-panel:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 17px 2px rgba(0,0,0,0.14), 
-                0 3px 14px 2px rgba(0,0,0,0.12), 
-                0 5px 5px -3px rgba(0,0,0,0.2);
-}
-
-.chip {
-    font-size: 1rem;
-    height: auto;
-    line-height: 2;
-    padding: 8px 12px;
-    border-radius: 16px;
-}
-
-.quota-indicator {
-    margin-top: 1rem;
-    min-height: 50px;
-}
-
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    updateQuota(document.getElementById('homeoffice_quota').value);
-    
-    // Formular-Änderungen überwachen
-    const form = document.getElementById('settingsForm');
-    const originalValues = new FormData(form);
-    
-    form.addEventListener('input', function() {
-        const currentValues = new FormData(form);
-        let hasChanges = false;
-        
-        for(let pair of currentValues.entries()) {
-            if(originalValues.get(pair[0]) !== pair[1]) {
-                hasChanges = true;
-                break;
-            }
-        }
-        
-        const saveButton = form.querySelector('button[type="submit"]');
-        if(hasChanges) {
-            saveButton.classList.add('pulse');
-        } else {
-            saveButton.classList.remove('pulse');
-        }
-    });
-});
-
-function updateQuota(value) {
-    const chip = document.getElementById('quotaChip');
-    const quotaText = document.getElementById('quotaText');
-    document.getElementById('homeoffice_quota').value = value;
-    
-    // Update text and color based on value
-    if(value <= 50) {
-        chip.className = 'chip green white-text';
-        quotaText.textContent = `${value}% - Innerhalb der empfohlenen Grenze`;
-    } else if(value <= 75) {
-        chip.className = 'chip orange white-text';
-        quotaText.textContent = `${value}% - Über der empfohlenen 50% Grenze`;
-    } else {
-        chip.className = 'chip red white-text';
-        quotaText.textContent = `${value}% - Sehr hoher Homeoffice-Anteil`;
-    }
-}
-</script>
 
 <?php include 'templates/footer.php'; ?>
